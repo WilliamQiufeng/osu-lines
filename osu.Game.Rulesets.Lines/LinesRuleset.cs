@@ -19,7 +19,7 @@ namespace osu.Game.Rulesets.Lines
 {
     public class LinesRuleset : Ruleset
     {
-        public override string Description => "arrows! lines!";
+        public override string Description => "osu! lines";
 
         public override DrawableRuleset CreateDrawableRulesetWith(IBeatmap beatmap, IReadOnlyList<Mod> mods = null) => new DrawableLinesRuleset(this, beatmap, mods);
 
