@@ -16,7 +16,7 @@ namespace osu.Game.Rulesets.Lines.Mods
         {
             ScoreInfo = new ScoreInfo
             {
-                User = new User { Username = "sample" },
+                User = new User { Username = "auto" },
             },
             Replay = new LinesAutoGenerator(beatmap).Generate(),
         };
