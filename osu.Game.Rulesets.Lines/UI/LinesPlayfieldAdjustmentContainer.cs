@@ -39,10 +39,10 @@ namespace osu.Game.Rulesets.Lines.UI
             };
         }
 
-        /// <summary>
-        /// A <see cref="Container"/> which scales its content relative to a target width.
-        /// </summary>
-        private class ScalingContainer : Container
+		/// <summary>
+		/// A <see cref="Container"/> which scales its content relative to a target width.
+		/// </summary>
+		private class ScalingContainer : Container
         {
             internal bool PlayfieldShift { get; set; }
 
