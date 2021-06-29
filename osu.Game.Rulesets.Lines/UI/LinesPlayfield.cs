@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Pooling;
@@ -28,13 +29,20 @@ namespace osu.Game.Rulesets.Lines.UI
     public class LinesPlayfield : Playfield, IKeyBindingHandler<LinesAction>
     {
         SkinnableSound hitSample;
-        private readonly JudgementContainer<DrawableLinesJudgement> judgementLayer;
+		private readonly PlayfieldBorder playfieldBorder;
+		private readonly JudgementContainer<DrawableLinesJudgement> judgementLayer;
 
         private readonly IDictionary<HitResult, DrawablePool<DrawableLinesJudgement>> poolDictionary = new Dictionary<HitResult, DrawablePool<DrawableLinesJudgement>>();
 
         private readonly Container judgementAboveHitObjectLayer;
         private readonly FollowPointRenderer followPoints;
         public static readonly Vector2 BASE_SIZE = new Vector2(512, 384);
+        public readonly Bindable<Vector2> HitObjectOffsetBindable = new Bindable<Vector2>();
+        public virtual Vector2 HitObjectOffset
+        {
+            get => HitObjectOffsetBindable.Value;
+            set => HitObjectOffsetBindable.Value = value;
+        }
 
         private readonly OrderedHitPolicy hitPolicy;
 
@@ -44,7 +52,6 @@ namespace osu.Game.Rulesets.Lines.UI
 			AddRangeInternal(new Drawable[]
 			{
 
-                HitObjectContainer,
                 hitSample = new SkinnableSound(new SampleInfo("normal-hitnormal")),
             });
 		}
@@ -53,6 +60,8 @@ namespace osu.Game.Rulesets.Lines.UI
         {
             InternalChildren = new Drawable[]
             {
+                playfieldBorder = new PlayfieldBorder { RelativeSizeAxes = Axes.Both },
+                HitObjectContainer,
                 followPoints = new FollowPointRenderer { RelativeSizeAxes = Axes.Both },
                 judgementLayer = new JudgementContainer<DrawableLinesJudgement> { RelativeSizeAxes = Axes.Both },
                 judgementAboveHitObjectLayer = new Container { RelativeSizeAxes = Axes.Both }
@@ -72,15 +81,15 @@ namespace osu.Game.Rulesets.Lines.UI
         {
             base.OnNewDrawableHitObject(drawableHitObject);
 
-            DrawableLinesHitObject maniaObject = (DrawableLinesHitObject)drawableHitObject;
+            DrawableLinesHitObject linesObject = (DrawableLinesHitObject)drawableHitObject;
 
             //maniaObject.AccentColour.Value = AccentColour;
-            maniaObject.CheckHittable = hitPolicy.IsHittable;
+            linesObject.CheckHittable = hitPolicy.IsHittable;
         }
 
         public bool OnPressed(LinesAction action)
         {
-            this.hitSample.Play();
+            hitSample.Play();
             return true;
         }
 
@@ -91,7 +100,8 @@ namespace osu.Game.Rulesets.Lines.UI
         protected override void OnHitObjectAdded(HitObject hitObject)
         {
             base.OnHitObjectAdded(hitObject);
-            followPoints.AddFollowPoints((LinesHitObject)hitObject);
+            followPoints.AddFollowPoints(hitObject as LinesHitObject);
+            (hitObject as LinesHitObject).HitObjectOffsetBindable.BindTo(HitObjectOffsetBindable);
         }
 
         protected override void OnHitObjectRemoved(HitObject hitObject)
