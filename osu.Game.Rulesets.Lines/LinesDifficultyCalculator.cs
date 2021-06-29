@@ -22,7 +22,7 @@ namespace osu.Game.Rulesets.Lines
         protected override DifficultyAttributes CreateDifficultyAttributes(IBeatmap beatmap, Mod[] mods, Skill[] skills, double clockRate)
         {
             var AverageTimeDifference = GetAverageTimeDifference(beatmap);
-            return new DifficultyAttributes(mods, skills, 1500 / AverageTimeDifference);
+            return new DifficultyAttributes(mods, skills, AllowedMaxDifference / AverageTimeDifference);
         }
 
         protected override IEnumerable<DifficultyHitObject> CreateDifficultyHitObjects(IBeatmap beatmap, double clockRate) => Enumerable.Empty<DifficultyHitObject>();
@@ -30,7 +30,7 @@ namespace osu.Game.Rulesets.Lines
         protected override Skill[] CreateSkills(IBeatmap beatmap, Mod[] mods, double clockRate) => new Skill[0];
 
 
-        public static readonly float AllowedMaxDifference = 2000;
+        public static readonly float AllowedMaxDifference = 1500;
         public static float GetAverageTimeDifference(IBeatmap beatmap)
         {
             var count = beatmap.HitObjects.Count;
