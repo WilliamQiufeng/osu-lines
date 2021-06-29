@@ -40,15 +40,12 @@ namespace osu.Game.Rulesets.Lines.Beatmaps
         protected override IEnumerable<LinesHitObject> ConvertHitObject(HitObject original, IBeatmap beatmap, CancellationToken cancellationToken)
         {
             var rand = new Random();
-            var ObjectPos = new Vector2(300, 300);
+            var ObjectPos = LinesPlayfield.BASE_SIZE / 2;
             var validAction = GetAction(original is IHasColumn col ? col.Column : rand.Next(0, 4));
             var vec = GetObjectOffset(validAction);
             if (Prev != null)
             {
-                ObjectPos = Prev.Position;
-                float difference = (float)(original.StartTime - Prev.StartTime);
-                difference = Math.Clamp(difference, 0, LinesDifficultyCalculator.AllowedMaxDifference);
-                ObjectPos += SumUpPos * DistanceTimeRatio * difference;
+                ObjectPos = GetExpectedPosition(original.StartTime);
                 if (Prev.StartTime == original.StartTime)
                 {
                     SumUpPos += vec;
@@ -65,21 +62,21 @@ namespace osu.Game.Rulesets.Lines.Beatmaps
                 PreviousObjectPosition = ObjectPos;
             }
             // Prevent HitObjects placed outside playfield
-            if (ObjectPos.X < 0)
-                ObjectPos.X += LinesPlayfield.BASE_SIZE.X;
-            else if (ObjectPos.X > LinesPlayfield.BASE_SIZE.X)
-                ObjectPos.X -= LinesPlayfield.BASE_SIZE.X;
-            if (ObjectPos.Y < 0)
-                ObjectPos.Y += LinesPlayfield.BASE_SIZE.Y;
-            else if (ObjectPos.Y > LinesPlayfield.BASE_SIZE.Y)
-                ObjectPos.Y -= LinesPlayfield.BASE_SIZE.Y;
+            //if (ObjectPos.X < 0)
+            //    ObjectPos.X += LinesPlayfield.BASE_SIZE.X;
+            //else if (ObjectPos.X > LinesPlayfield.BASE_SIZE.X)
+            //    ObjectPos.X -= LinesPlayfield.BASE_SIZE.X;
+            //if (ObjectPos.Y < 0)
+            //    ObjectPos.Y += LinesPlayfield.BASE_SIZE.Y;
+            //else if (ObjectPos.Y > LinesPlayfield.BASE_SIZE.Y)
+            //    ObjectPos.Y -= LinesPlayfield.BASE_SIZE.Y;
             yield return Prev = new LinesHitObject
             {
                 Samples = original.Samples,
                 StartTime = original.StartTime,
                 ValidAction = validAction,
                 Position = ObjectPos,
-                PreviousObjectPosition = PreviousObjectPosition,
+                PreviousObject = Prev,
             };
         }
 
@@ -87,6 +84,14 @@ namespace osu.Game.Rulesets.Lines.Beatmaps
 		{
 			return new LinesBeatmap();
 		}
+
+        protected Vector2 GetExpectedPosition(double start_time)
+		{
+            var ObjectPos = Prev.Position;
+            float difference = (float)(start_time - Prev.StartTime);
+            difference = Math.Clamp(difference, 0, LinesDifficultyCalculator.AllowedMaxDifference);
+            return ObjectPos + SumUpPos * DistanceTimeRatio * difference;
+        }
 
 		protected LinesAction GetAction(int X)
 		{
